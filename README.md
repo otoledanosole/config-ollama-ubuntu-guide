@@ -2,7 +2,7 @@
 
 **Versión:** 1.0  
 **Fecha:** Octubre 2025  
-**Autor:** Oscar Toledano Soleolla
+**Autor:** Oscar Toledano Sole   
 **Hardware objetivo:** AMD Ryzen 9 3900X, 128GB RAM, NVIDIA RTX 5060 Ti 16GB VRAM  
 **Sistema Operativo:** Ubuntu 24.04 LTS
 
