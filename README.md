@@ -36,9 +36,9 @@
    - 6.2 [Configuración de usuario](#62-configuración-de-usuario)
    - 6.3 [Optimización de memoria](#63-optimización-de-memoria)
 7. [Selección y Descarga de Modelos](#7-selección-y-descarga-de-modelos)
-   - 7.1 [Modelos recomendados para RAG](#71-modelos-recomendados-para-rag)
-   - 7.2 [Modelos para conversación](#72-modelos-para-conversación)
-   - 7.3 [Script de descarga automatizada](#73-script-de-descarga-automatizada)
+   - 7.1 [Modelos Recomendados para RAG](#71-modelos-recomendados-para-rag)
+   - 7.2 [Modelos para Conversación, Agentes y Tool Calling](#72-modelos-para-conversación-agentes-y-tool-calling)
+   - 7.3 [Modelos Especializados](#73-modelos-especializados)
    - 7.4 [Gestión de modelos](#74-gestión-de-modelos)
 8. [Optimizaciones del Sistema](#8-optimizaciones-del-sistema)
    - 8.1 [Configuración de memoria](#81-configuración-de-memoria)
@@ -763,307 +763,408 @@ export OLLAMA_NUM_BATCH=256
 
 ## 7. Selección y Descarga de Modelos
 
-### 7.1 Modelos recomendados para RAG
+### 7.1 Modelos Recomendados para RAG
 
 #### A. Modelos de Embedding
 
 Los modelos de embedding convierten texto en vectores numéricos para búsqueda semántica.
 
-**Recomendación principal: mxbai-embed-large**
+##### **Recomendación Principal 2025: qwen3-embedding:8b**
 
 ```bash
-ollama pull mxbai-embed-large
+ollama pull qwen3-embedding:8b
 ```
 
 **Características:**
-- Dimensiones: 1024
-- Tamaño: ~670MB
-- Contexto: 512 tokens
-- Ventaja: Alto rendimiento, ampliamente usado en producción
-- Precisión: >90% en benchmarks RAG
+- **Ranking:** #1 en MTEB multilingüe (score 70.58, junio 2025)
+- **Dimensiones:** 1024
+- **Tamaño:** ~4.7GB
+- **Contexto:** Hasta 128K tokens
+- **Idiomas:** Más de 100 idiomas
+- **Ventaja:** Mejor rendimiento general, excelente multilingüe
+- **Precisión:** 94%+ en benchmarks
 
-**Alternativas:**
+##### **Alternativas Recomendadas:**
 
+**mxbai-embed-large - Clásico confiable**
 ```bash
-# Para soporte multilingüe superior
-ollama pull qwen3-embedding:8b
-
-# Para máxima velocidad
-ollama pull nomic-embed-text
-
-# Para alta precisión (mayor tamaño)
-ollama pull bge-large
+ollama pull mxbai-embed-large
 ```
+**Características:**
+- Parámetros: 334M
+- Dimensiones: 1024
+- Tamaño: ~670MB (1.2GB)
+- Contexto: 512 tokens
+- Velocidad: Rápida
+- Precisión: 92%+ (MTEB score 64.68)
+- **Ventaja:** Supera a text-embedding-3-large de OpenAI siendo significativamente más pequeño
 
-**Comparación de modelos de embedding:**
+**nomic-embed-text - Máxima velocidad**
+```bash
+ollama pull nomic-embed-text
+```
+**Características:**
+- Parámetros: 137M
+- Dimensiones: 768
+- Tamaño: ~274MB (0.5GB)
+- Velocidad: Muy alta
+- Precisión: 88%+ (MTEB score 53.01)
+- **Ventaja:** Supera a text-embedding-ada-002 y text-embedding-3-small de OpenAI en tareas de contexto corto y largo
 
-| Modelo | Parámetros | Tamaño | Dimensiones | Velocidad | Precisión |
-|--------|------------|--------|-------------|-----------|-----------|
-| mxbai-embed-large | 334M | 670MB | 1024 | Alta | 92%+ |
-| nomic-embed-text | 137M | 274MB | 768 | Muy alta | 88%+ |
-| qwen3-embedding:8b | 8B | 4.7GB | 1024 | Media | 94%+ |
-| bge-large | 335M | 670MB | 1024 | Alta | 91%+ |
+##### **Comparación de Modelos de Embedding:**
+
+| Modelo | Parámetros | Tamaño | Dimensiones | Velocidad | Precisión | Multilingüe |
+|--------|------------|--------|-------------|-----------|-----------|-------------|
+| **qwen3-embedding:8b** | 8B | 4.7GB | 1024 | Media | **94%+** | ⭐⭐⭐⭐⭐ |
+| mxbai-embed-large | 334M | 1.2GB | 1024 | Rápida | 92%+ | ⭐⭐⭐ |
+| nomic-embed-text | 137M | 0.5GB | 768 | **Muy rápida** | 88%+ | ⭐⭐⭐ |
+| bge-large | 335M | 1.4GB | 1024 | Media | 91%+ | ⭐⭐⭐⭐ |
 
 #### B. Modelos de Generación para RAG
 
-**Recomendación para velocidad: llama3.2:8b**
+##### **Recomendación Principal: llama3.1:8b-instruct**
 
 ```bash
-# Versión optimizada con cuantización Q4_K_M
-ollama pull llama3.2:8b-instruct-q4_K_M
+ollama pull llama3.1:8b-instruct
 ```
 
 **Características:**
 - Tamaño: ~4.7GB
-- VRAM necesaria: ~5-6GB
-- Velocidad en RTX 5060 Ti: 40-60 tokens/segundo
-- Calidad: Excelente para la mayoría de tareas RAG
+- VRAM necesaria: ~5-6GB (cabe en 8GB)
+- Velocidad: 35-45 tokens/segundo
+- Contexto: 128K tokens
+- **Calidad:** Excelente para RAG, seguimiento de instrucciones superior
+- **Optimización:** Ollama reduce uso de memoria para que quepa en menos de 8GB
 
-**Recomendación para calidad máxima: llama3.3:70b**
+**¿Por qué es ideal para RAG?**
+- Excelente comprensión de contexto largo
+- Superior seguimiento de instrucciones
+- Balance perfecto velocidad/calidad
+- Compatible con hardware medio
+
+##### **Alternativas por Hardware:**
+
+**Hardware Limitado (8-16GB RAM):**
 
 ```bash
-# Requiere offloading a RAM
-ollama pull llama3.3:70b-instruct-q4_K_M
+# Opción 1: Llama 3.2 - Más rápido
+ollama pull llama3.2:3b
+
+# Opción 2: Mistral - Equilibrio
+ollama pull mistral:7b-instruct
+
+# Opción 3: Phi-3 - Ultra ligero
+ollama pull phi-3:3.8b-mini
+```
+
+**Hardware Medio (16-32GB RAM):**
+
+```bash
+# Opción 1: Qwen 2.5 - Multilingüe superior
+ollama pull qwen2.5:14b-instruct
+
+# Opción 2: Llama 3.1 - Mejor general
+ollama pull llama3.1:8b-instruct
+```
+
+**Hardware Potente (32GB+ RAM):**
+
+```bash
+# Máxima calidad
+ollama pull llama3.1:70b-instruct
+```
+
+##### **Comparación de Modelos LLM para RAG:**
+
+| Modelo | Tamaño | VRAM | Velocidad | Calidad RAG | Hardware Requerido |
+|--------|--------|------|-----------|-------------|-------------------|
+| llama3.2:3b | 2GB | 3-4GB | 50-70 tok/s | ⭐⭐⭐ | Básico (8GB RAM) |
+| mistral:7b | 4GB | 5-6GB | 40-50 tok/s | ⭐⭐⭐⭐ | Medio (8GB RAM) |
+| **llama3.1:8b** | 4.7GB | 5-6GB | 35-45 tok/s | ⭐⭐⭐⭐⭐ | Medio (8-16GB RAM) |
+| qwen2.5:14b | 8.5GB | 9-10GB | 30-40 tok/s | ⭐⭐⭐⭐⭐ | Bueno (16GB RAM) |
+| llama3.1:70b | 40GB | 48GB+ | 10-15 tok/s | ⭐⭐⭐⭐⭐ | Potente (32GB+ RAM) |
+
+##### **Setup Óptimo RAG Recomendado:**
+
+```bash
+# Embedding (elegir uno):
+ollama pull qwen3-embedding:8b      # Mejor calidad 2025
+ollama pull mxbai-embed-large       # Muy confiable, más rápido
+ollama pull nomic-embed-text        # Máxima velocidad
+
+# LLM (según hardware):
+ollama pull llama3.1:8b-instruct    # Equilibrio perfecto
+ollama pull qwen2.5:14b-instruct    # Más potencia + multilingüe
+```
+
+---
+
+### 7.2 Modelos para Conversación, Agentes y Tool Calling
+
+#### A. Mejores Modelos para Agentes con Tool Calling
+
+##### **NIVEL ÉLITE - Máxima Calidad**
+
+**1. llama3.1:8b-instruct - MEJOR OPCIÓN GENERAL**
+
+```bash
+ollama pull llama3.1:8b-instruct
+```
+
+**Características:**
+- Tamaño: ~4.7GB
+- VRAM: 8GB
+- Velocidad: 38 tokens/segundo
+- **Performance Tool Calling:**
+  - Comprensión de esquemas: 91%
+  - Extracción de parámetros: 93%
+  - Manejo de errores: 89%
+  - Tiempo de respuesta: 1.2s
+
+**¿Por qué es el mejor?**
+- Mejor opción para function calling
+- Mejoras significativas en uso de herramientas
+- Requisitos de hardware razonables
+- Ideal para sistemas de producción
+
+**2. llama3.1:70b-instruct - Máxima Potencia**
+
+```bash
+ollama pull llama3.1:70b-instruct
 ```
 
 **Características:**
 - Tamaño: ~40GB
-- VRAM: Parcial (~10-12GB en GPU, resto en RAM)
-- Velocidad: 8-15 tokens/segundo
-- Calidad: Estado del arte, comparable a GPT-4
+- VRAM: 64GB
+- Velocidad: 12 tokens/segundo
+- **Performance Tool Calling:**
+  - Comprensión de esquemas: 96%
+  - Extracción de parámetros: 95%
+  - Manejo de errores: 94%
+  - Tiempo de respuesta: 4.2s
 
-**Balance perfecto: qwen3:14b**
+**Ideal para:** Aplicaciones empresariales donde la precisión es primordial
+
+**3. qwen2.5:7b / qwen2.5:14b - Excelente Alternativa**
 
 ```bash
-ollama pull qwen3:14b-instruct-q4_K_M
+ollama pull qwen2.5:7b-instruct
+# o para más potencia:
+ollama pull qwen2.5:14b-instruct
 ```
 
 **Características:**
-- Tamaño: ~8.5GB
-- VRAM: ~9GB (cabe perfectamente)
-- Velocidad: 30-40 tokens/segundo
-- Calidad: Excelente balance, multilingüe superior
+- Tamaño: 4.7GB (7b) / 8.5GB (14b)
+- Contexto: Hasta 128K tokens
+- Dataset: 18 trillones de tokens
+- **Ventajas:**
+  - Excelente para tool calling local
+  - Capacidad multilingüe superior (100+ idiomas)
+  - Soporte nativo de tool calling con plantillas Hermes
+  - Optimizado para máquinas pequeñas
 
-### 7.2 Modelos para conversación
+##### **NIVEL ÓPTIMO - Equilibrio Perfecto**
 
-#### A. Uso diario y análisis general
-
-**qwen3:14b - Recomendación principal**
+**4. mistral:7b-instruct - Más Rápido**
 
 ```bash
-ollama pull qwen3:14b-instruct-q4_K_M
+ollama pull mistral:7b-instruct
+```
+
+**Características:**
+- Tamaño: 4GB
+- VRAM: 7GB
+- **Performance Tool Calling:**
+  - Comprensión de esquemas: 86%
+  - Extracción de parámetros: 85%
+  - Manejo de errores: 87%
+  - Velocidad: 45 tokens/segundo (EL MÁS RÁPIDO)
+  - Tiempo de respuesta: 0.8s
+
+**Ventajas:**
+- Rendimiento impresionante con bajos recursos
+- Perfecto para entornos con recursos limitados
+- Rápido, preciso y adaptable
+
+**5. arcee-agent:7b - Especialista en Agentes**
+
+```bash
+ollama pull arcee-ai/arcee-agent:7b
+```
+
+**Características:**
+- Parámetros: 7B (basado en Qwen2-7B)
+- **Diseñado específicamente para:**
+  - Function calling avanzado
+  - Uso de herramientas
+  - Interpretar, ejecutar y encadenar llamadas
+  - Compatible con múltiples formatos de herramientas
+
+**Ideal para:**
+- Middleware inteligente
+- Agentes de chat standalone
+- Sistemas que requieren encadenamiento de funciones
+
+##### **NIVEL EFICIENTE - Hardware Limitado**
+
+**6. phi-3:3.8b-mini - Súper Ligero**
+
+```bash
+ollama pull phi-3:3.8b-mini
+```
+
+**Características:**
+- Tamaño: ~2.3GB
+- Rendimiento: Por encima de su tamaño
+- **Ventajas:**
+  - Iguala a modelos más grandes en MMLU
+  - Se ejecuta en teléfonos
+  - Phi-4-mini incluye soporte de function calling
+
+**7. llama3.2:3b - Rápido y Ligero**
+
+```bash
+ollama pull llama3.2:3b
+```
+
+**Características:**
+- Modelos pequeños de Meta (1B-3B)
+- Excelente para pruebas rápidas
+- Agentes simples y herramientas básicas
+
+#### B. Tabla Comparativa - Tool Calling Performance
+
+| Modelo | Comprensión Schema | Extracción Parámetros | Manejo Errores | Velocidad (tok/s) | Memoria | Score Total |
+|--------|-------------------|----------------------|----------------|-------------------|---------|-------------|
+| **Llama 3.1 70B** | 96% | 95% | 94% | 12 | 64GB | ⭐⭐⭐⭐⭐ |
+| **Llama 3.1 8B** | 91% | 93% | 89% | 38 | 8GB | ⭐⭐⭐⭐⭐ |
+| CodeLlama 13B | 89% | 90% | 88% | 28 | 12GB | ⭐⭐⭐⭐ |
+| Mixtral 8x7B | 88% | 87% | 88% | 25 | 24GB | ⭐⭐⭐⭐ |
+| Mistral 7B | 86% | 85% | 87% | **45** | 7GB | ⭐⭐⭐⭐ |
+
+#### C. Recomendaciones por Caso de Uso
+
+##### **Para Agentes de Conversación General:**
+
+```bash
+# Mejor balance calidad/velocidad
+ollama pull llama3.1:8b-instruct
+
+# Excelente alternativa multilingüe
+ollama pull qwen2.5:7b-instruct
+
+# Más rápido
+ollama pull mistral:7b-instruct
+```
+
+##### **Para Tool Calling Avanzado:**
+
+```bash
+# Mejor rendimiento general
+ollama pull llama3.1:8b-instruct
+
+# Especialista en herramientas
+ollama pull arcee-ai/arcee-agent:7b
+
+# Más potencia + contexto largo
+ollama pull qwen2.5:14b-instruct
+```
+
+##### **Para Hardware Limitado (8-16GB RAM):**
+
+```bash
+# Ultra ligero con function calling
+ollama pull phi-3:3.8b-mini
+
+# Rápido y eficiente
+ollama pull llama3.2:3b
+
+# Mejor equilibrio en hardware limitado
+ollama pull mistral:7b-instruct
+```
+
+##### **Para Máxima Calidad (32GB+ RAM):**
+
+```bash
+# El mejor en tool calling
+ollama pull llama3.1:70b-instruct
+
+# MoE potente
+ollama pull mixtral:8x7b-instruct
+```
+
+#### D. Configuración Multi-Modelo Recomendada
+
+**Setup Óptimo para Sistemas de Agentes:**
+
+```bash
+# Modelo principal - Agentes complejos
+ollama pull llama3.1:8b-instruct
+
+# Modelo rápido - Tareas simples y routing
+ollama pull mistral:7b-instruct
+
+# Modelo especialista (opcional)
+ollama pull arcee-ai/arcee-agent:7b
+```
+
+**Ventajas de esta configuración:**
+- **Modelo ligero** para pruebas rápidas, herramientas simples y routing
+- **Modelo pesado** para análisis profundo, generación y cadenas de agentes
+- Permite offload de prompts simples a modelos rápidos
+- Ahorra memoria y mejora rendimiento
+
+---
+
+### 7.3 Modelos Especializados
+
+#### A. Para Código y Desarrollo
+
+**deepseek-coder:6.7b - Especialista en Programación**
+
+```bash
+ollama pull deepseek-coder:6.7b-instruct
+```
+
+**Características:**
+- Entrenado en 2+ trillones de tokens de código
+- Supera a modelos más grandes en benchmarks de código
+- Excelente para code completion, debugging y generación
+
+**Para Análisis Más Avanzado:**
+
+```bash
+ollama pull deepseek-coder:33b-instruct
+```
+
+#### B. Para Razonamiento Avanzado
+
+**deepseek-r1:8b - Razonamiento Paso a Paso**
+
+```bash
+ollama pull deepseek-r1:8b
 ```
 
 **Ventajas:**
-- Excelente razonamiento general
-- Soporte multilingüe superior (100+ idiomas)
-- Buena velocidad
-- Cabe completamente en VRAM
-
-#### B. Razonamiento avanzado
-
-**deepseek-r1:8b - Para análisis complejos**
-
-```bash
-ollama pull deepseek-r1:8b-q4_K_M
-```
-
-**Ventajas:**
-- Especializado en razonamiento paso a paso
+- Especializado en razonamiento complejo
 - Excelente para matemáticas y lógica
 - Capacidad de auto-verificación
 - Menor tamaño que otros modelos de razonamiento
 
-**deepseek-r1:32b - Para máxima capacidad de razonamiento**
+#### C. Para Visión (Multimodal)
+
+**llama3.2-vision:11b - Análisis de Imágenes**
 
 ```bash
-ollama pull deepseek-r1:32b-q4_K_M
+ollama pull llama3.2-vision:11b-instruct
 ```
 
-**Características:**
-- Tamaño: ~19GB
-- Requiere offloading parcial
-- Velocidad: 15-25 tokens/segundo
-- Razonamiento cercano a GPT-4
-
-#### C. Modelos especializados
-
-**Para código:**
+**Alternativa Más Pequeña:**
 
 ```bash
-# DeepSeek Coder - Especialista en programación
-ollama pull deepseek-coder:6.7b-instruct-q4_K_M
-
-# Para análisis de código más avanzado
-ollama pull deepseek-coder:33b-instruct-q4_K_M
-```
-
-**Para visión (multimodal):**
-
-```bash
-# Llama 3.2 Vision - Análisis de imágenes
-ollama pull llama3.2-vision:11b-instruct-q4_K_M
-
-# Alternativa más pequeña
 ollama pull llava:7b
 ```
 
-### 7.3 Script de descarga automatizada
-
-Crear un script para descargar todos los modelos recomendados:
-
-```bash
-#!/bin/bash
-
-# =============================================================================
-# Script de instalación de modelos Ollama
-# Optimizado para: RTX 5060 Ti 16GB + 128GB RAM
-# =============================================================================
-
-# Colores para output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
-echo "=========================================="
-echo "Instalación de Modelos Ollama"
-echo "=========================================="
-echo "Hardware: RTX 5060 Ti 16GB + 128GB RAM"
-echo "Sistema: Ubuntu 24.04"
-echo ""
-
-# Función para descargar modelos con feedback
-download_model() {
-    local model=$1
-    local description=$2
-    
-    echo -e "\n${BLUE}Descargando: $model${NC}"
-    echo -e "${YELLOW}Descripción: $description${NC}"
-    
-    if ollama pull "$model"; then
-        echo -e "${GREEN}✓ $model descargado correctamente${NC}"
-        
-        # Mostrar información del modelo
-        local size=$(ollama list | grep "$model" | awk '{print $2}')
-        echo -e "${GREEN}  Tamaño: $size${NC}"
-    else
-        echo -e "${RED}✗ Error descargando $model${NC}"
-        return 1
-    fi
-}
-
-# =============================================================================
-# MODELOS DE EMBEDDING
-# =============================================================================
-echo -e "\n${BLUE}=== MODELOS DE EMBEDDING ===${NC}"
-echo "Los modelos de embedding se usan para convertir texto en vectores para RAG"
-
-download_model "mxbai-embed-large" "Embedding principal - Alta precisión (1024 dims)"
-download_model "nomic-embed-text" "Embedding rápido - Alternativa ligera (768 dims)"
-
-# =============================================================================
-# MODELOS DE GENERACIÓN (Elige uno según prioridad)
-# =============================================================================
-echo -e "\n${BLUE}=== MODELOS DE GENERACIÓN PARA RAG ===${NC}"
-
-echo -e "\n${YELLOW}Selecciona el modelo de generación:${NC}"
-echo "1) llama3.2:8b (RECOMENDADO) - Rápido, cabe en VRAM (~5GB)"
-echo "2) qwen3:14b - Balance calidad/velocidad (~9GB)"
-echo "3) llama3.3:70b - Máxima calidad, requiere RAM (~40GB)"
-echo "4) Instalar todos"
-echo "5) Saltar"
-
-read -p "Opción (1-5): " gen_choice
-
-case $gen_choice in
-    1)
-        download_model "llama3.2:8b-instruct-q4_K_M" "Generación rápida - 40-60 tok/s"
-        ;;
-    2)
-        download_model "qwen3:14b-instruct-q4_K_M" "Balance perfecto - 30-40 tok/s"
-        ;;
-    3)
-        download_model "llama3.3:70b-instruct-q4_K_M" "Máxima calidad - 8-15 tok/s"
-        ;;
-    4)
-        download_model "llama3.2:8b-instruct-q4_K_M" "Generación rápida"
-        download_model "qwen3:14b-instruct-q4_K_M" "Balance perfecto"
-        download_model "llama3.3:70b-instruct-q4_K_M" "Máxima calidad"
-        ;;
-    5)
-        echo "Saltando modelos de generación..."
-        ;;
-    *)
-        echo "Opción inválida, instalando modelo recomendado..."
-        download_model "llama3.2:8b-instruct-q4_K_M" "Generación rápida"
-        ;;
-esac
-
-# =============================================================================
-# MODELOS PARA CONVERSACIÓN
-# =============================================================================
-echo -e "\n${BLUE}=== MODELOS PARA CONVERSACIÓN ===${NC}"
-
-download_model "qwen3:14b-instruct-q4_K_M" "Conversación general - Multilingüe superior"
-
-# =============================================================================
-# MODELOS ESPECIALIZADOS
-# =============================================================================
-echo -e "\n${BLUE}=== MODELOS ESPECIALIZADOS (OPCIONAL) ===${NC}"
-
-read -p "¿Instalar modelo de razonamiento avanzado? (s/n): " reasoning_choice
-if [[ $reasoning_choice =~ ^[Ss]$ ]]; then
-    download_model "deepseek-r1:8b-q4_K_M" "Razonamiento y análisis complejo"
-fi
-
-read -p "¿Instalar modelo para programación? (s/n): " code_choice
-if [[ $code_choice =~ ^[Ss]$ ]]; then
-    download_model "deepseek-coder:6.7b-instruct-q4_K_M" "Generación y análisis de código"
-fi
-
-read -p "¿Instalar modelo multimodal (visión)? (s/n): " vision_choice
-if [[ $vision_choice =~ ^[Ss]$ ]]; then
-    download_model "llama3.2-vision:11b-instruct-q4_K_M" "Análisis de imágenes y documentos"
-fi
-
-# =============================================================================
-# RESUMEN
-# =============================================================================
-echo -e "\n${GREEN}=========================================="
-echo "Instalación completada!"
-echo "==========================================${NC}"
-
-echo -e "\n${BLUE}Modelos instalados:${NC}"
-ollama list
-
-echo -e "\n${BLUE}Espacio usado por modelos:${NC}"
-du -sh ~/.ollama/models
-
-echo -e "\n${YELLOW}Comandos útiles:${NC}"
-echo "  ollama list                     - Ver modelos instalados"
-echo "  ollama run <modelo>             - Ejecutar modelo interactivo"
-echo "  ollama rm <modelo>              - Eliminar modelo"
-echo "  ollama show <modelo>            - Ver detalles del modelo"
-
-echo -e "\n${GREEN}¡Sistema listo para usar!${NC}"
-```
-
-**Guardar y ejecutar:**
-
-```bash
-# Guardar script
-nano ~/install_ollama_models.sh
-
-# Copiar el contenido anterior
-
-# Hacer ejecutable
-chmod +x ~/install_ollama_models.sh
-
-# Ejecutar
-~/install_ollama_models.sh
-```
 
 ### 7.4 Gestión de modelos
 
